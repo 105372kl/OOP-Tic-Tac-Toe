@@ -2,3 +2,20 @@ html, body {
   height: 100%;
   width: 100%;
 }
+
+
+.grid-container {
+  display: grid;
+  grid: auto / auto auto auto;
+  grid-gap: 5px;
+  background-color: black;
+  padding: 5px;
+}
+
+.grid-container > button {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px 0;
+  border: none;
+}
+
+/* https://freefrontend.com/css-3d-buttons/ !!!!!SKEUMORPHIC BUTTON, game like set up? */
