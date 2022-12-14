@@ -6,16 +6,31 @@ html, body {
 
 .grid-container {
   display: grid;
-  grid: auto / auto auto auto;
-  grid-gap: 5px;
+  width: 302px;
+  /*grid-template-columns: 150px;
+  /*grid: auto / auto auto auto;*/
+  grid: 100px / 100px 100px 100px;
+  grid-gap: 0px;
+  border: 5px inset grey;
   background-color: black;
   padding: 5px;
 }
 
 .grid-container > button {
   background-color: rgba(255, 255, 255, 0.8);
-  padding: 20px 0;
-  border: none;
+  height: 100px;
+  width: 100px; 
+  /*padding: 20px 0; */
+  border: 5px inset grey !important;
+  text-transform: uppercase;
+  font-size: 80px;
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0px;
+}
+
+.grid-container > button:hover {
+  background-color: red;
 }
 
 /* https://freefrontend.com/css-3d-buttons/ !!!!!SKEUMORPHIC BUTTON, game like set up? */
