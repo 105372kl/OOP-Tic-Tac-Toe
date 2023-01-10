@@ -30,12 +30,12 @@ var gameboard = {
       let oCount = 0;
       for (let i = 0; i < 3; i++) {
         //console.log(args[i])
-        function getTile () {
+        function getTile() {
           if (args.length > 1) {
-            return "tile"+(args[t][i])
+            return "tile" + (args[t][i])
           }
           else {
-            return "tile"+(args[0][i])
+            return "tile" + (args[0][i])
           }
         }
         let tileCheck = getTile() //note to future self: eval() parses str into var
@@ -53,44 +53,48 @@ var gameboard = {
           return "win";
         case 2:
           //console.log("hi");
-          break;
+          return "o2";
         case 1:
           //console.log("hi");
-          break;
+          return "o1";
       }
       switch (xCount) {
         case 3:
           return "win";
         case 2:
           //console.log("hi");
-          break;
+          return "x2";
         case 1:
           //console.log("hi");
-          break;
+          return "x1";
       }
-      //console.log("oCount "+oCount)
-      //console.log("xCount "+xCount)
     }
+    //console.log("oCount "+oCount)
+    //console.log("xCount "+xCount)
   },
+  column0: [1, 4, 7],
+  column1: [2, 5, 8],
+  column2: [3, 6, 9],
+
   columnCheck: () => {
-    let column0 = [1,4,7]
-    let column1 = [2,5,8]
-    let column2 = [3,6,9]
-    return gameboard.check(column0, column1, column2)
+    return gameboard.check(gameboard.column0, gameboard.column1, gameboard.column2)
   },
+  row0: [1, 2, 3],
+  row1: [4, 5, 6],
+  row2: [7, 8, 9],
+
   rowCheck: () => {
-    let row0 = [1,2,3]
-    let row1 = [4,5,6]
-    let row2 = [7,8,9]
-    return gameboard.check(row0, row1, row2)
+    return gameboard.check(gameboard.row0, gameboard.row1, gameboard.row2)
   },
+  forwardSlash: [1, 5, 9],
+
   fSlashCheck: () => {
-    let forwardSlash = [1,5,9]
-    return gameboard.check(forwardSlash)
+    return gameboard.check(gameboard.forwardSlash)
   },
+  backSlash: [3, 5, 7],
+
   bSlashCheck: () => {
-    let backSlash = [3,5,7]
-    return gameboard.check(backSlash)
+    return gameboard.check(gameboard.backSlash)
   }
 }
 
@@ -111,17 +115,17 @@ function turn() {
     gameboard.bSlashCheck(),
   ]
   if (conditionsArray.indexOf("win") != -1) {
-     win()
+    win()
   }
-  
+
   if (gameboard.turnNum % 2 == 1) {
-    console.log("Turn: "+gameboard.turnNum);
+    console.log("Turn: " + gameboard.turnNum);
     playerTurn();
   }
   else if (gameboard.turnNum != -1) {
-    console.log("Turn: "+gameboard.turnNum);
+    console.log("Turn: " + gameboard.turnNum);
     cpuTurn();
-  } 
+  }
 }
 
 function firstTurn() {
@@ -163,7 +167,14 @@ function cpuTurn() {
   if (gameboard.turnNum == 2) {
     randomMove();
   }
-  let randomNum = Math.floor((Math.random() * 4) + 1)
+  randomCheck();
+
+  gameboard.turnNum += 1;
+  turn();
+}
+
+function randomCheck() {
+  let randomNum = Math.floor((Math.random() * 4) + 1);
   switch (randomNum) {
     case 1:
       cpuCheck("columnCheck()")
@@ -178,17 +189,31 @@ function cpuTurn() {
       cpuCheck("bSlashCheck()")
       break;
   }
-  gameboard.turnNum += 1;
-  turn();
 }
 
-function cpuCheck(randomcheck) {
-  console.log("gameboard."+randomcheck)
+function cpuCheck(check) {
+  console.log(check)
+  switch (eval("gameboard." + check)) {
+    case "o2":
+      fillGap(check)
+      break;
+    case "x2":
+      alert("x2")
+      break;
+    case "o1":
+      break;
+    case "x1":
+      break;
+  }
+}
+
+function fillGap(check) {
+  eval("gameboard." + check)
 }
 
 function randomMove() {
-  let randomNum =  Math.floor((Math.random() * 9) + 1)
-  let selectedTile = document.getElementById("tile"+randomNum)
+  let randomNum = Math.floor((Math.random() * 9) + 1)
+  let selectedTile = document.getElementById("tile" + randomNum)
   if (gameboard["tile" + randomNum].state == "-") {
     selectedTile.innerHTML = "o"
     gameboard["tile" + randomNum].state = "o";
