@@ -77,7 +77,7 @@ class gameboardObject {
           }
         case 1:
           if (attack == true) {
-            if (xCount < 2) {
+            if (xCount == 0) {
               return getLine();
             }
           }
@@ -156,6 +156,10 @@ function turn() {
     win()
   }
 
+  if (checkDraw() == 0) {
+    draw()
+  }
+
   if (gameboard.turnNum % 2 == 1) {
     console.log("Turn: " + gameboard.turnNum);
     playerTurn();
@@ -164,6 +168,20 @@ function turn() {
     console.log("Turn: " + gameboard.turnNum);
     cpuTurn();
   }
+}
+
+function checkDraw() {
+  let drawCount = 0
+  let tiles = []
+  for (let i = 1; i <= 9; i++) {
+    tiles.push("tile"+i)
+  }
+  for (let i = 0; i < tiles.length; i++) {
+    if (gameboard[tiles[i]].state == "-") {
+      drawCount++
+    }
+  }
+  return drawCount
 }
 
 function randomInt(min, max) {
@@ -199,6 +217,11 @@ function win() {
   gameboard.turnNum = -1;
 }
 
+function draw() {
+  alert("draw");
+  gameboard.turnNum = -1;
+}
+
 function playerTurn() {
   for (let i = 1; i <= 9; i++) {
     gameboard["tile" + i.toString()].button.addEventListener("click", playerClick);
@@ -230,7 +253,6 @@ function cpuAttack() {
     
   }
   else {
-    alert("boo :<")
     randomMove()
   }
 }
