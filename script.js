@@ -1,137 +1,142 @@
 
 class tile {
-  static flatCoordinates = [[1, 00], [2, 01], [3, 02], [4, 10], [5, 11], [6, 12], [7, 20], [8, 21], [9, 22]]
+  //static flatCoordinates = [[1, 00], [2, 01], [3, 02], [4, 10], [5, 11], [6, 12], [7, 20], [8, 21], [9, 22]]
   constructor(coordinates, state) {
     this.coordinates = coordinates;
     this.state = state;
-    this.flatten = () => {
-      for (let i = 0; i <= 9; i++) {
-        if (this.coordinates == tile.flatCoordinates[i][1]) {
-          return tile.flatCoordinates[i][0];
-        }
-      }
-    }
-    this.array = () => {
-      for (let i = 0; i <= 9; i++) {
-        if (this.coordinates == tile.flatCoordinates[i][0]) {
-          return tile.flatCoordinates[i][1];
-        }
-      }
-    }
+    // this.flatten = () => {
+    //   for (let i = 0; i <= 9; i++) {
+    //     if (this.coordinates == tile.flatCoordinates[i][1]) {
+    //       return tile.flatCoordinates[i][0];
+    //     }
+    //   }
+    // }
+    // this.array = () => {
+    //   for (let i = 0; i <= 9; i++) {
+    //     if (this.coordinates == tile.flatCoordinates[i][0]) {
+    //       return tile.flatCoordinates[i][1];
+    //     }
+    //   }
+    // }
   }
 }
-
-var gameboard = {
-  turnNum: 0,
-  check(...args) {
+class gameboardObject {
+  constructor() {
+    this.turnNum = 0,
+    this.check = (...args) => {
     //console.log(args)
     if (args[0] == true) {
-      alert("hi")
-      args.shift();
-       for (let t = 0; t < 3; t++) {
-        for (let i = 0; i < 3; i++) {
-          //console.log(args[i])
-          function getTile() {
-            if (args.length > 1) {
-              return "tile" + (args[t][i])
-            }
-            else {
-              return "tile" + (args[0][i])
-            }
-          }
-          let tileCheck = getTile() //note to future self: eval() parses str into var
-          let check = gameboard[tileCheck].state
-        }
-       }
+      var attack = true;
     }
-    else {
-      args.shift();
-      for (let t = 0; t < 3; t++) {
-        let xCount = 0;
-        let oCount = 0;
-        for (let i = 0; i < 3; i++) {
-          //console.log(args[i])
-          function getTile() {
-            if (args.length > 1) {
-              return "tile" + (args[t][i])
-            }
-            else {
-              return "tile" + (args[0][i])
-            }
+    args.shift();
+    for (let t = 0; t < 3; t++) {
+      let xCount = 0;
+      let oCount = 0;
+      for (let i = 0; i < 3; i++) {
+        //console.log(args[t])
+        function getTile() {
+          if (args.length > 1) {
+            return "tile" + (args[t][i])
           }
-          let tileCheck = getTile() //note to future self: eval() parses str into var
-          let check = gameboard[tileCheck].state
-          //console.log(check);
-          if (check == "o") {
+          else {
+            return "tile" + (args[0][i])
+          }
+        }
+        let tileCheck = getTile() //note to future self: eval() parses str into var
+        let check = gameboard[tileCheck].state
+        //console.log(check);
+        switch (check) {
+          case "o":
             oCount++
-          }
-          else if (check == "x") {
+            break;
+          case "x":
             xCount++
-          }
-        }
-        switch (oCount) {
-          case 3:
-            return "win";
-          case 2:
-            //console.log("hi");
-            return "o2";
-          case 1:
-            //console.log("hi");
-            return "o1";
-        }
-        switch (xCount) {
-          case 3:
-            return "win";
-          case 2:
-            //console.log("hi");
-            return "x2";
-          case 1:
-            //console.log("hi");
-            return "x1";
+            break;
         }
       }
+      function getLine() {
+        function filterArrays(x) {
+          let checkedArrays = args[x].filter((element) => {
+            return element !== undefined;
+          });
+          return checkedArrays
+        }
+        if (args.length > 1) {
+          return filterArrays(t)
+        }
+        else {
+          return filterArrays(0)
+        }
+      }
+      switch (oCount) {
+        case 3:
+          return "win";
+        case 2: //Why does "&& oCount == 0" not work?
+          if (xCount == 0) {
+            return getLine();
+          }
+        case 1:
+          if (attack == true) {
+            if (xCount < 2) {
+              return getLine();
+            }
+          }
+      }
+      switch (xCount) {
+        case 3:
+          return "win";
+        case 2:
+          if (oCount == 0) {
+            return getLine();
+          }
+      }
     }
-
-    //console.log("oCount "+oCount)
-    //console.log("xCount "+xCount)
   },
-  column0: [1, 4, 7],
-  column1: [2, 5, 8],
-  column2: [3, 6, 9],
-
-  columnCheck: (fillGap = false) => {
-    return gameboard.check(
-      fillGap,
-      gameboard.column0,
-      gameboard.column1,
-      gameboard.column2
-    )
-  },
-  row0: [1, 2, 3],
-  row1: [4, 5, 6],
-  row2: [7, 8, 9],
-
-  rowCheck: (fillGap = false) => {
-    return gameboard.check(
-      fillGap,
-      gameboard.row0,
-      gameboard.row1,
-      gameboard.row2
-    )
-  },
-  forwardSlash: [1, 5, 9],
-
-  fSlashCheck: (fillGap = false) => {
-    return gameboard.check(fillGap, gameboard.forwardSlash)
-  },
-  backSlash: [3, 5, 7],
-
-  bSlashCheck: (fillGap = false) => {
-    return gameboard.check(fillGap, gameboard.backSlash)
+    this.column0 = [1, 4, 7],
+    this.column1 = [2, 5, 8],
+    this.column2 = [3, 6, 9],
+  
+    this.columnCheck = (attack = false) => {
+      return gameboard.check(
+        attack,
+        gameboard.column0,
+        gameboard.column1,
+        gameboard.column2
+      )
+    },
+    this.row0 = [1, 2, 3],
+    this.row1 = [4, 5, 6],
+    this.row2 = [7, 8, 9],
+  
+    this.rowCheck = (attack = false) => {
+      return gameboard.check(
+        attack,
+        gameboard.row0,
+        gameboard.row1,
+        gameboard.row2
+      )
+    },
+    this.forwardSlash = [1, 5, 9],
+  
+    this.fSlashCheck = (attack = false) => {
+      return gameboard.check(
+        attack,
+        gameboard.forwardSlash
+      )
+    },
+    this.backSlash = [3, 5, 7],
+  
+    this.bSlashCheck = (attack = false) => {
+      return gameboard.check(
+        attack,
+        gameboard.backSlash
+      )
+    }
   }
 }
 
 function newBoard() {
+  gameboard = new gameboardObject
   for (let i = 1; i <= 9; i++) {
     gameboard["tile" + i.toString()] = new tile(i);
     gameboard["tile" + i.toString()].button = document.getElementById("tile" + i);
@@ -140,7 +145,7 @@ function newBoard() {
 }
 
 function turn() {
-  //console.log("columnCheck: ")
+  //console.log("columnCheck: "+gameboard.columnCheck())
   let conditionsArray = [
     gameboard.columnCheck(),
     gameboard.rowCheck(),
@@ -161,8 +166,12 @@ function turn() {
   }
 }
 
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function firstTurn() {
-  //gameboard.turnNum = Math.floor((Math.random() * 2) + 1);
+  //gameboard.turnNum = randomInt(1, 2);
   gameboard.turnNum = 1;
   turn();
 }
@@ -197,72 +206,128 @@ function playerTurn() {
 }
 
 function cpuTurn() {
-  if (gameboard.turnNum == 2) {
-    randomMove();
+  // if (gameboard.turnNum == 2) {
+  //   randomMove();
+  // }
+  let playableLines = checkBoard();
+  if (playableLines.length > 0) {
+    console.log(JSON.stringify(playableLines))
+    cpuPlayTile(playableLines)
   }
-  randomCheck();
-
+  else {
+    cpuAttack()
+  }
   gameboard.turnNum += 1;
   turn();
 }
 
-function randomCheck() {
-  let randomNum = Math.floor((Math.random() * 4) + 1);
-  switch (randomNum) {
-    case 1:
-      cpuCheck("columnCheck(")
-      break;
-    case 2:
-      cpuCheck("rowCheck(")
-      break;
-    case 3:
-      cpuCheck("fSlashCheck(")
-      break;
-    case 4:
-      cpuCheck("bSlashCheck(")
-      break;
+function cpuAttack() {
+  let attack = true
+  let playableLines = checkBoard(attack);
+  if (playableLines.length > 0) {
+    console.log(JSON.stringify(playableLines))
+    cpuPlayTile(playableLines)
+    
+  }
+  else {
+    alert("boo :<")
+    randomMove()
   }
 }
 
-function cpuCheck(check) {
-  console.log(check)
-  switch (eval("gameboard." + check + ")")) {
-    case "o2":
-      cpuFillGap(check)
+function cpuPlayTile(playableLines) {
+  for (let i = 0; i < playableLines.length; i++) {
+    let turn = fillGap(playableLines[i])
+    if (turn == "turnPlayed") {
       break;
-    case "x2":
-      cpuFillGap(check)
-      break;
-    case "o1":
-      break;
-    case "x1":
-      break;
+    }
   }
 }
 
-function cpuFillGap(check) {
-  let fillGap = true;
-  let str = "gameboard." + check + fillGap + ")";
-  eval(str)
-
+function checkBoard(attack) {
+  let checkList = [
+    "columnCheck(",
+    "rowCheck(",
+    "fSlashCheck(",
+    "bSlashCheck(",
+  ]
+  if (attack == true) {
+    checkList.forEach((element, index) => {
+      checkList[index] = element+"attack"
+    })
+  }
+  console.log(checkList)
+  let unfilteredPlayableLines = []
+  checkList.forEach(getLine, unfilteredPlayableLines)
+  let playableLines = unfilteredPlayableLines.filter((n) => {
+    return n != null;
+  });
+  return playableLines
 }
+
+function getLine(check) {
+  console.log("gameboard." + check + ")")
+  let attack = true;
+  let line = eval("gameboard." + check + ")")
+  this.push(line)
+}
+
+function fillGap(playableLines) {
+  for (let i = 0; i < playableLines.length; i++) {
+    let tileCheck = "tile"+playableLines[i]
+    if (gameboard[tileCheck].state == "-") {
+      let tileDOM = document.getElementById(tileCheck)
+      gameboard[tileCheck].state = "o"
+      tileDOM.innerHTML = "o"
+      return "turnPlayed"
+    }
+    else "nextLine"
+  }
+}
+  
+// function cpuCheck(check) {
+//   console.log(check)
+//   switch (eval("gameboard." + check + ")")) {
+//     case "o2":
+//       console.log('case1')
+//       cpuFillGap(check)
+//       break;
+//     case "x2":
+//       console.log('case2')
+//       cpuFillGap(check)
+//       break;
+//   }
+// }
+    
+// function cpuFillGap(check) {
+//   let fillGap = true;
+//   let getTileCheck = eval("gameboard." + check + fillGap + ")")
+//   console.log(getTileCheck)
+//   if (getTileCheck == "none") {
+//     alert("none")
+//   }
+//   else {
+//     console.log("gameboard." + check + fillGap + ")")
+//     let tileDOM = document.getElementById(getTileCheck)
+//     if (gameboard[getTileCheck].state == "-") {
+//       gameboard[getTileCheck].state = "o"
+//       tileDOM.innerHTML = "o"
+//     }
+//   }
+// }
 
 function randomMove() {
-  let randomNum = Math.floor((Math.random() * 9) + 1)
-  let selectedTile = document.getElementById("tile" + randomNum)
-  if (gameboard["tile" + randomNum].state == "-") {
-    selectedTile.innerHTML = "o"
-    gameboard["tile" + randomNum].state = "o";
+  let randomNum = randomInt(1, 9)
+  let selectedTile = "tile" + randomNum
+  let selectedTileDOM = document.getElementById(selectedTile)
+  if (gameboard[selectedTile].state == "-") {
+    selectedTileDOM.innerHTML = "o"
+    gameboard[selectedTile].state = "o";
   }
   else {
     randomMove()
   }
 }
-
-
-/* console.log(this)
-  This shows that the scope of this gets set to global when you dont define the function with the add event listener
-*/
-
+var gameboard = []
 newBoard()
 firstTurn()
