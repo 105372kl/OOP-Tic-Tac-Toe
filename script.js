@@ -54,18 +54,19 @@ class gameboardObject {
             break;
         }
       }
-      function getLine() {
-        function filterArrays(x) {
+      function getLine(value) {
+        function filterArrays(x, value) {
           let checkedArrays = args[x].filter((element) => {
             return element !== undefined;
           });
+          checkedArrays.unshift(value)
           return checkedArrays
         }
         if (args.length > 1) {
-          return filterArrays(t)
+          return filterArrays(t, value)
         }
         else {
-          return filterArrays(0)
+          return filterArrays(0, value)
         }
       }
       switch (oCount) {
@@ -73,7 +74,7 @@ class gameboardObject {
           return "win";
         case 2: //Why does "&& oCount == 0" not work?
           if (xCount == 0) {
-            return getLine();
+            return getLine("o");
           }
         case 1:
           if (attack == true) {
@@ -87,7 +88,7 @@ class gameboardObject {
           return "win";
         case 2:
           if (oCount == 0) {
-            return getLine();
+            return getLine("x");
           }
       }
     }
@@ -213,7 +214,15 @@ function playerClick() {
 }
 
 function win() {
-  alert("win");
+  console.log("win")
+  switch (gameboard.turnNum % 2) {
+    case 0:
+      alert("pog");
+      break;
+    case 1:
+      alert("skill issue");
+      break;
+  }
   gameboard.turnNum = -1;
 }
 
@@ -248,7 +257,7 @@ function cpuAttack() {
   let attack = true
   let playableLines = checkBoard(attack);
   if (playableLines.length > 0) {
-    console.log(JSON.stringify(playableLines))
+    console.log("attack: "+JSON.stringify(playableLines))
     cpuPlayTile(playableLines)
     
   }
@@ -278,9 +287,20 @@ function checkBoard(attack) {
       checkList[index] = element+"attack"
     })
   }
-  console.log(checkList)
+  //console.log(checkList)
   let unfilteredPlayableLines = []
-  checkList.forEach(getLine, unfilteredPlayableLines)
+  checkList.forEach(getLine, unfilteredPlayableLines) //DOES NOT ACTIVATE GETLINE FOR EACH COLUMN/ROW
+
+
+
+
+
+
+
+
+  
+  console.log(JSON.stringify("unfilteredPlayableLines: "+unfilteredPlayableLines))
+  
   let playableLines = unfilteredPlayableLines.filter((n) => {
     return n != null;
   });
@@ -295,15 +315,15 @@ function getLine(check) {
 }
 
 function fillGap(playableLines) {
+  playableLines.shift()
   for (let i = 0; i < playableLines.length; i++) {
     let tileCheck = "tile"+playableLines[i]
     if (gameboard[tileCheck].state == "-") {
       let tileDOM = document.getElementById(tileCheck)
-      gameboard[tileCheck].state = "o"
-      tileDOM.innerHTML = "o"
+      gameboard[tileCheck].state = "o";
+      tileDOM.innerHTML = "o";
       return "turnPlayed"
     }
-    else "nextLine"
   }
 }
   
