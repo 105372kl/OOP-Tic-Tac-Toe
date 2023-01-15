@@ -1,74 +1,57 @@
 class gameboardObject {
   constructor() {
     this.turnNum = 0,
+    //"args" accepts two value types: "attack" (boolean), and a series of tile numbers. The first defines whether or not the function will return the tile number of a tile with the value "o", or if the function will operate normally. In normal operation, the function will parse through any series of tile numbers (rows, columns, diagonals) that is passed as parameters, and return the series of tile numbers where a possible play is availabe (e.g. playing an "o" in the "1,2,3" row)
     this.check = (...args) => {
-    //console.log(args)
+    // If parameter "attack" is true (which is read as the first item in array "args", then make a new variable)
     if (args[0] == true) {
       var attack = true;
     }
+    //Remove the first item of array "args" (which would be the "attack" parameter), so that it is not read as a combo/series of tile numbers
     args.shift();
-    for (let t = 0; t < 3; t++) {
-      let xCount = 0;
-      let oCount = 0;
-      for (let i = 0; i < 3; i++) {
-        //console.log(args[t])
-        function getTile() {
-          if (args.length > 1) {
-            return "tile" + (args[t][i])
-          }
-          else {
-            return "tile" + (args[0][i])
-          }
-        }
-        let tileCheck = getTile() //note to future self: eval() parses str into var
-        let check = gameboard[tileCheck].state
-        //console.log(check);
-        switch (check) {
-          case "o":
-            oCount++
-            break;
-          case "x":
-            xCount++
-            break;
-        }
+    let xCount = 0;
+    let oCount = 0;
+    //Loops through each number in combo array
+    for (let i = 0; i < 3; i++) {
+      let tileCheck = "tile" + (args[0][i])
+      let check = gameboard[tileCheck].state
+      //Counts up number of "x" or "o" in given combo array
+      switch (check) {
+        case "o":
+          oCount++
+          break;
+        case "x":
+          xCount++
+          break;
       }
-      function getLine(value) {
-        function filterArrays(x, value) {
-          let checkedArrays = args[x].filter((element) => {
-            return element !== undefined;
-          });
-          checkedArrays.unshift(value)
-          return checkedArrays
+    }
+    //getLine is called after all "x" and "o" have been counted, a cloned array of current combo is given, with a value ("x" or "o") attached to the front to be read later
+    function getLine(value) {
+      let array = args[0].slice()
+      array.unshift(value)
+      return array
+    }
+    switch (oCount) {
+      case 3:
+        return "win";
+      case 2: //Why does "&& oCount == 0" not work?
+        if (xCount == 0) {
+          return getLine("o");
         }
-        if (args.length > 1) {
-          return filterArrays(t, value)
-        }
-        else {
-          return filterArrays(0, value)
-        }
-      }
-      switch (oCount) {
-        case 3:
-          return "win";
-        case 2: //Why does "&& oCount == 0" not work?
+      case 1:
+        if (attack == true) {
           if (xCount == 0) {
-            return getLine("o");
+            return getLine();
           }
-        case 1:
-          if (attack == true) {
-            if (xCount == 0) {
-              return getLine();
-            }
-          }
-      }
-      switch (xCount) {
-        case 3:
-          return "win";
-        case 2:
-          if (oCount == 0) {
-            return getLine("x");
-          }
-      }
+        }
+    }
+    switch (xCount) {
+      case 3:
+        return "win";
+      case 2:
+        if (oCount == 0) {
+          return getLine("x");
+        }
     }
   },
     this.column0 = [1, 4, 7],
@@ -111,24 +94,9 @@ class gameboardObject {
 }
 
 class tile {
-  //static flatCoordinates = [[1, 00], [2, 01], [3, 02], [4, 10], [5, 11], [6, 12], [7, 20], [8, 21], [9, 22]]
   constructor(coordinates, state) {
     this.coordinates = coordinates;
     this.state = state;
-    // this.flatten = () => {
-    //   for (let i = 0; i <= 9; i++) {
-    //     if (this.coordinates == tile.flatCoordinates[i][1]) {
-    //       return tile.flatCoordinates[i][0];
-    //     }
-    //   }
-    // }
-    // this.array = () => {
-    //   for (let i = 0; i <= 9; i++) {
-    //     if (this.coordinates == tile.flatCoordinates[i][0]) {
-    //       return tile.flatCoordinates[i][1];
-    //     }
-    //   }
-    // }
   }
 }
 
@@ -144,15 +112,15 @@ function newBoard() {
     gameboard["tile" + i.toString()].state = "-";
   }
 }
-
+//Generates a random number to decide whether the player (odds) or CPU (evens) go first
 function firstTurn() {
   gameboard.turnNum = randomInt(1, 2);
   //gameboard.turnNum = 1;
   turn();
 }
 
+//First checks if any winning moves have been made, if not, checks if there is a draw, if not, trigger player or CPU turn
 function turn() {
-  //console.log("columnCheck: "+gameboard.columnCheck())
   let conditionsArray = [
     gameboard.columnCheck(false, 0),
     gameboard.columnCheck(false, 1),
@@ -166,34 +134,32 @@ function turn() {
   if (conditionsArray.indexOf("win") != -1) {
     win()
   }
-
-  if (checkDraw() == 0) {
+  else if (checkDraw() == 0) {
     draw()
   }
 
   if (gameboard.turnNum % 2 == 1) {
-    console.log("Turn: " + gameboard.turnNum);
     playerTurn();
   }
   else if (gameboard.turnNum != -1) {
-    console.log("Turn: " + gameboard.turnNum);
     cpuTurn();
   }
 }
 
 function win() {
-  console.log("win")
   switch (gameboard.turnNum % 2) {
     case 0:
-      alert("pog");
+      alert("Player Wins");
       break;
     case 1:
-      alert("skill issue");
+      alert("CPU Wins");
       break;
   }
   gameboard.turnNum = -1;
 }
 
+
+// Loops through each of gameboard's 9 tiles to check its state and returns the number of empty tiles.
 function checkDraw() {
   let drawCount = 0
   let tiles = []
@@ -209,20 +175,21 @@ function checkDraw() {
 }
 
 function draw() {
-  alert("draw");
+  alert("Draw");
   gameboard.turnNum = -1;
 }
 
+//Allows the player to click on tiles
 function playerTurn() {
   for (let i = 1; i <= 9; i++) {
     gameboard["tile" + i.toString()].button.addEventListener("click", playerClick);
   }
 }
 
+//Checks if clicked tile is empty, if so, change state of tile to X, change HTML of tile to X, and prevent player from choosing another tile.
 function playerClick() {
   if (this.innerHTML == "") {
     this.innerHTML = "x";
-    //console.log(this)
     for (let i = 1; i <= 9; i++) {
       gameboard["tile" + i.toString()].button.removeEventListener("click", playerClick);
     }
@@ -237,10 +204,12 @@ function playerClick() {
   }
 }
 
+
+// Checks board for optimal playable moves and plays them if not, checks board to find any "o" tiles, and "attacks" by playing a tile in the same column/row/diagonal of that "o" tile, if not, play random tile
 function cpuTurn() {
   let playableLines = checkBoard();
   if (playableLines.length != 0) {
-    console.log(JSON.stringify(playableLines))
+    //Plays winning moves first, before playing blocking moves
     if (cpuPlayTile(playableLines, "o") != "turnPlayed") {
       cpuPlayTile(playableLines, "x")
     }
@@ -264,59 +233,49 @@ function checkBoard(attack) {
     "fSlashCheck(false",
     "bSlashCheck(false",
   ]
-  
+  // If CPU is attacking, replace "false" with "true" to make an "attack check" to find a tile that already has an "o" is found, in order to play another "o" in the same column/row/diagonal
   if (attack == true) {
     checkList.forEach((element, index) => {
       checkList[index] = element.replace("false","true")
     })
   }
-  //console.log(checkList)
-  let unfilteredPlayableLines = []
-  checkList.forEach(getLine, unfilteredPlayableLines)
-  //console.log(JSON.stringify("unfilteredPlayableLines: "+unfilteredPlayableLines))
   
+  //Checks each column/row/diagonal for any optimal playable moves.
+  let unfilteredPlayableLines = []
+  checkList.forEach(getPlayableLine, unfilteredPlayableLines)
+  
+  // Filters plays to remove any "undefined"/non-optimal plays
   let playableLines = unfilteredPlayableLines.filter((n) => {
     return n != null;
   });
-  //console.log(playableLines)
+  
   return playableLines
 }
 
-function getLine(check) {
-  //console.log("gameboard." + check + ")")
+//Checks each column/row/diagonal for any optimal playable moves.
+function getPlayableLine(check) {
   let line = eval("gameboard." + check + ")")
   this.push(line)
 }
 
-function cpuAttack() {
-  //alert("attack")
-  let playableLines = checkBoard(true);
-  if (playableLines.length > 0) {
-    //console.log("attack: "+JSON.stringify(playableLines))
-    cpuPlayTile(playableLines, "attack")
-  }
-  else {
-    //alert("random")
-    randomMove()
-  }
-}
+//For each playable move, if attacking, then play a tile in the same column/row/diagonal as another "o" tile, if not, then play tiles that have a value of "o" first, and then "x" second
 
 function cpuPlayTile(playableLines, value) {
   for (let i = 0; i < playableLines.length; i++) {
     if (value == "attack") {
-      let turn = fillGap(playableLines[i])
-      if (turn == "turnPlayed") {
+      if (fillGap(playableLines[i]) == "turnPlayed") {
         return "turnPlayed";
       }
     }
     if (playableLines[i][0] == value) {
-      let turn = fillGap(playableLines[i])
-      if (turn == "turnPlayed") {
+      if (fillGap(playableLines[i]) == "turnPlayed") {
         return "turnPlayed";
       }
     }
   }
 }
+
+//For each tile in given combo/array, check if empty, if so, play "o"
 
 function fillGap(playableLines) {
   playableLines.shift()
@@ -328,6 +287,17 @@ function fillGap(playableLines) {
       tileDOM.innerHTML = "o";
       return "turnPlayed"
     }
+  }
+}
+
+//Check board again, but now with "attack check", if there are no attack moves, perform a random move.
+function cpuAttack() {
+  let playableLines = checkBoard(true);
+  if (playableLines.length > 0) {
+    cpuPlayTile(playableLines, "attack")
+  }
+  else {
+    randomMove()
   }
 }
 
