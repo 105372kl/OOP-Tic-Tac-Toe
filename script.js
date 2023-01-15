@@ -1,25 +1,3 @@
-
-class tile {
-  //static flatCoordinates = [[1, 00], [2, 01], [3, 02], [4, 10], [5, 11], [6, 12], [7, 20], [8, 21], [9, 22]]
-  constructor(coordinates, state) {
-    this.coordinates = coordinates;
-    this.state = state;
-    // this.flatten = () => {
-    //   for (let i = 0; i <= 9; i++) {
-    //     if (this.coordinates == tile.flatCoordinates[i][1]) {
-    //       return tile.flatCoordinates[i][0];
-    //     }
-    //   }
-    // }
-    // this.array = () => {
-    //   for (let i = 0; i <= 9; i++) {
-    //     if (this.coordinates == tile.flatCoordinates[i][0]) {
-    //       return tile.flatCoordinates[i][1];
-    //     }
-    //   }
-    // }
-  }
-}
 class gameboardObject {
   constructor() {
     this.turnNum = 0,
@@ -97,24 +75,20 @@ class gameboardObject {
     this.column1 = [2, 5, 8],
     this.column2 = [3, 6, 9],
   
-    this.columnCheck = (attack = false) => {
+    this.columnCheck = (attack = false, x) => {
       return gameboard.check(
         attack,
-        gameboard.column0,
-        gameboard.column1,
-        gameboard.column2
+        gameboard["column"+x]
       )
     },
     this.row0 = [1, 2, 3],
     this.row1 = [4, 5, 6],
     this.row2 = [7, 8, 9],
   
-    this.rowCheck = (attack = false) => {
+    this.rowCheck = (attack = false, x) => {
       return gameboard.check(
         attack,
-        gameboard.row0,
-        gameboard.row1,
-        gameboard.row2
+        gameboard["row"+x]
       )
     },
     this.forwardSlash = [1, 5, 9],
@@ -136,6 +110,32 @@ class gameboardObject {
   }
 }
 
+class tile {
+  //static flatCoordinates = [[1, 00], [2, 01], [3, 02], [4, 10], [5, 11], [6, 12], [7, 20], [8, 21], [9, 22]]
+  constructor(coordinates, state) {
+    this.coordinates = coordinates;
+    this.state = state;
+    // this.flatten = () => {
+    //   for (let i = 0; i <= 9; i++) {
+    //     if (this.coordinates == tile.flatCoordinates[i][1]) {
+    //       return tile.flatCoordinates[i][0];
+    //     }
+    //   }
+    // }
+    // this.array = () => {
+    //   for (let i = 0; i <= 9; i++) {
+    //     if (this.coordinates == tile.flatCoordinates[i][0]) {
+    //       return tile.flatCoordinates[i][1];
+    //     }
+    //   }
+    // }
+  }
+}
+
+var gameboard = []
+newBoard()
+firstTurn()
+
 function newBoard() {
   gameboard = new gameboardObject
   for (let i = 1; i <= 9; i++) {
@@ -145,13 +145,23 @@ function newBoard() {
   }
 }
 
+function firstTurn() {
+  gameboard.turnNum = randomInt(1, 2);
+  //gameboard.turnNum = 1;
+  turn();
+}
+
 function turn() {
   //console.log("columnCheck: "+gameboard.columnCheck())
   let conditionsArray = [
-    gameboard.columnCheck(),
-    gameboard.rowCheck(),
-    gameboard.fSlashCheck(),
-    gameboard.bSlashCheck(),
+    gameboard.columnCheck(false, 0),
+    gameboard.columnCheck(false, 1),
+    gameboard.columnCheck(false, 2),
+    gameboard.rowCheck(false, 0),
+    gameboard.rowCheck(false, 1),
+    gameboard.rowCheck(false, 2),
+    gameboard.fSlashCheck(false),
+    gameboard.bSlashCheck(false),
   ]
   if (conditionsArray.indexOf("win") != -1) {
     win()
@@ -171,6 +181,19 @@ function turn() {
   }
 }
 
+function win() {
+  console.log("win")
+  switch (gameboard.turnNum % 2) {
+    case 0:
+      alert("pog");
+      break;
+    case 1:
+      alert("skill issue");
+      break;
+  }
+  gameboard.turnNum = -1;
+}
+
 function checkDraw() {
   let drawCount = 0
   let tiles = []
@@ -185,14 +208,15 @@ function checkDraw() {
   return drawCount
 }
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function draw() {
+  alert("draw");
+  gameboard.turnNum = -1;
 }
 
-function firstTurn() {
-  //gameboard.turnNum = randomInt(1, 2);
-  gameboard.turnNum = 1;
-  turn();
+function playerTurn() {
+  for (let i = 1; i <= 9; i++) {
+    gameboard["tile" + i.toString()].button.addEventListener("click", playerClick);
+  }
 }
 
 function playerClick() {
@@ -213,38 +237,13 @@ function playerClick() {
   }
 }
 
-function win() {
-  console.log("win")
-  switch (gameboard.turnNum % 2) {
-    case 0:
-      alert("pog");
-      break;
-    case 1:
-      alert("skill issue");
-      break;
-  }
-  gameboard.turnNum = -1;
-}
-
-function draw() {
-  alert("draw");
-  gameboard.turnNum = -1;
-}
-
-function playerTurn() {
-  for (let i = 1; i <= 9; i++) {
-    gameboard["tile" + i.toString()].button.addEventListener("click", playerClick);
-  }
-}
-
 function cpuTurn() {
-  // if (gameboard.turnNum == 2) {
-  //   randomMove();
-  // }
   let playableLines = checkBoard();
-  if (playableLines.length > 0) {
+  if (playableLines.length != 0) {
     console.log(JSON.stringify(playableLines))
-    cpuPlayTile(playableLines)
+    if (cpuPlayTile(playableLines, "o") != "turnPlayed") {
+      cpuPlayTile(playableLines, "x")
+    }
   }
   else {
     cpuAttack()
@@ -253,65 +252,70 @@ function cpuTurn() {
   turn();
 }
 
-function cpuAttack() {
-  let attack = true
-  let playableLines = checkBoard(attack);
-  if (playableLines.length > 0) {
-    console.log("attack: "+JSON.stringify(playableLines))
-    cpuPlayTile(playableLines)
-    
-  }
-  else {
-    randomMove()
-  }
-}
-
-function cpuPlayTile(playableLines) {
-  for (let i = 0; i < playableLines.length; i++) {
-    let turn = fillGap(playableLines[i])
-    if (turn == "turnPlayed") {
-      break;
-    }
-  }
-}
-
 function checkBoard(attack) {
+
   let checkList = [
-    "columnCheck(",
-    "rowCheck(",
-    "fSlashCheck(",
-    "bSlashCheck(",
+    "columnCheck(false, 0",
+    "columnCheck(false, 1",
+    "columnCheck(false, 2",
+    "rowCheck(false, 0",
+    "rowCheck(false, 1",
+    "rowCheck(false, 2",
+    "fSlashCheck(false",
+    "bSlashCheck(false",
   ]
+  
   if (attack == true) {
     checkList.forEach((element, index) => {
-      checkList[index] = element+"attack"
+      checkList[index] = element.replace("false","true")
     })
   }
   //console.log(checkList)
   let unfilteredPlayableLines = []
-  checkList.forEach(getLine, unfilteredPlayableLines) //DOES NOT ACTIVATE GETLINE FOR EACH COLUMN/ROW
-
-
-
-
-
-
-
-
-  
-  console.log(JSON.stringify("unfilteredPlayableLines: "+unfilteredPlayableLines))
+  checkList.forEach(getLine, unfilteredPlayableLines)
+  //console.log(JSON.stringify("unfilteredPlayableLines: "+unfilteredPlayableLines))
   
   let playableLines = unfilteredPlayableLines.filter((n) => {
     return n != null;
   });
+  //console.log(playableLines)
   return playableLines
 }
 
 function getLine(check) {
-  console.log("gameboard." + check + ")")
-  let attack = true;
+  //console.log("gameboard." + check + ")")
   let line = eval("gameboard." + check + ")")
   this.push(line)
+}
+
+function cpuAttack() {
+  //alert("attack")
+  let playableLines = checkBoard(true);
+  if (playableLines.length > 0) {
+    //console.log("attack: "+JSON.stringify(playableLines))
+    cpuPlayTile(playableLines, "attack")
+  }
+  else {
+    //alert("random")
+    randomMove()
+  }
+}
+
+function cpuPlayTile(playableLines, value) {
+  for (let i = 0; i < playableLines.length; i++) {
+    if (value == "attack") {
+      let turn = fillGap(playableLines[i])
+      if (turn == "turnPlayed") {
+        return "turnPlayed";
+      }
+    }
+    if (playableLines[i][0] == value) {
+      let turn = fillGap(playableLines[i])
+      if (turn == "turnPlayed") {
+        return "turnPlayed";
+      }
+    }
+  }
 }
 
 function fillGap(playableLines) {
@@ -326,37 +330,6 @@ function fillGap(playableLines) {
     }
   }
 }
-  
-// function cpuCheck(check) {
-//   console.log(check)
-//   switch (eval("gameboard." + check + ")")) {
-//     case "o2":
-//       console.log('case1')
-//       cpuFillGap(check)
-//       break;
-//     case "x2":
-//       console.log('case2')
-//       cpuFillGap(check)
-//       break;
-//   }
-// }
-    
-// function cpuFillGap(check) {
-//   let fillGap = true;
-//   let getTileCheck = eval("gameboard." + check + fillGap + ")")
-//   console.log(getTileCheck)
-//   if (getTileCheck == "none") {
-//     alert("none")
-//   }
-//   else {
-//     console.log("gameboard." + check + fillGap + ")")
-//     let tileDOM = document.getElementById(getTileCheck)
-//     if (gameboard[getTileCheck].state == "-") {
-//       gameboard[getTileCheck].state = "o"
-//       tileDOM.innerHTML = "o"
-//     }
-//   }
-// }
 
 function randomMove() {
   let randomNum = randomInt(1, 9)
@@ -370,6 +343,7 @@ function randomMove() {
     randomMove()
   }
 }
-var gameboard = []
-newBoard()
-firstTurn()
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
