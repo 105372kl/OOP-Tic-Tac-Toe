@@ -190,6 +190,7 @@ function playerTurn() {
 function playerClick() {
   if (this.innerHTML == "") {
     this.innerHTML = "x";
+    this.classList.add("x");
     for (let i = 1; i <= 9; i++) {
       gameboard["tile" + i.toString()].button.removeEventListener("click", playerClick);
     }
@@ -285,6 +286,7 @@ function fillGap(playableLines) {
       let tileDOM = document.getElementById(tileCheck)
       gameboard[tileCheck].state = "o";
       tileDOM.innerHTML = "o";
+      tileDOM.classList.add("o");
       return "turnPlayed"
     }
   }
@@ -308,6 +310,7 @@ function randomMove() {
   if (gameboard[selectedTile].state == "-") {
     selectedTileDOM.innerHTML = "o"
     gameboard[selectedTile].state = "o";
+    selectedTileDOM.classList.add("o");
   }
   else {
     randomMove()
@@ -317,3 +320,13 @@ function randomMove() {
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+/*Missing Features:
+  - Play moves adjacent to previously played tile
+  - Turn counter
+  - Win counter
+  - Reset button
+  - strike through line?
+  - 3D CSS?
+  - Colored X and Os
+*/
